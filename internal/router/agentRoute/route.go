@@ -8,7 +8,7 @@ import (
 )
 
 
-func StudentRouter() *http.ServeMux {
+func AgentRouter() *http.ServeMux {
 	route,storage :=  router.StudentRoute()
 
 	route.HandleFunc("GET /api/student/{id}", agent.GetById(storage))

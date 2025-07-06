@@ -166,5 +166,14 @@ func (s *Sqlite) AssignOrderToAgent(orderID int64, agentID int64) error {
 	return err
 }
 
+func (s *Sqlite) CheckInAgent(agent types.Agent) error {
+	_, err := s.Db.Exec(`
+		INSERT INTO agents (name, warehouse_id, checked_in)
+		VALUES (?, ?, 1)
+		ON CONFLICT(name, warehouse_id) DO UPDATE SET checked_in = 1
+	`, agent.Name, agent.WarehouseID)
+	return err
+}
+
 
 

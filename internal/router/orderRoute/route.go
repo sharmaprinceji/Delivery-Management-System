@@ -8,12 +8,11 @@ import (
 )
 
 
-func StudentRouter() *http.ServeMux {
+func OrderRouter() *http.ServeMux {
 	route ,storage:=  router.StudentRoute()
 
-	route.HandleFunc("GET /api/assignments", order.GetAssignments(storage))
-	route.HandleFunc("GET /api/checkin", order.CheckInAgent(storage))
+	route.HandleFunc("GET  /api/assignments", order.GetAssignments(storage))
+	route.HandleFunc("Post /api/checkin", order.CheckInAgent(storage))
 	
-
 	return route;
 }

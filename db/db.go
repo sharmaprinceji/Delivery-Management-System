@@ -9,7 +9,7 @@ import (
 )
 
 func Mydb(cfg *config.Config) (storage.Storage, error) {
-	st, err := sqlite.New(cfg) // Make sure sqlite.New accepts *config.Config too
+	st, err := sqlite.New(cfg) 
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}

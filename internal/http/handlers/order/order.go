@@ -6,22 +6,23 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"log/slog"
+
+	//"log/slog"
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 	"github.com/sharmaprinceji/delivery-management-system/internal/types"
 	"github.com/sharmaprinceji/delivery-management-system/internal/utils/response"
 )
 
-
+var validate = validator.New()
 func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var agent types.Agent
+
 		err := json.NewDecoder(r.Body).Decode(&agent)
-		log.Printf("Received agent data: %+v\n", agent)
-		
 		if errors.Is(err, io.EOF) {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("request body is invalid")))
 			return
@@ -30,15 +31,25 @@ func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("failed to decode request body: %v", err)))
 			return
 		}
+		//debugging log
+         log.Printf("Received agent data: %+v\n", agent)
 
-		// if err := validator.Save().Struct(agent); err != nil {
-		// 	validateErrs := err.(validator.ValidationErrors)
-		// 	response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
-		// 	return
-		// }
+		// Validation
+		if err := validate.Struct(agent); err != nil {
+			validateErrs := err.(validator.ValidationErrors)
+			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
+			return
+		}
 
-		slog.Info("student created successfully")
-		response.WriteJSON(w, http.StatusCreated, map[string]string{"id": "done"})
+		// Call storage layer to mark agent as checked in
+		err = storage.CheckInAgent(agent)
+		if err != nil {
+			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to check-in agent: %v", err)))
+			return
+		}
+
+		log.Printf("Agent checked in successfully: %+v", agent)
+		response.WriteJSON(w, http.StatusCreated, map[string]string{"status": "agent checked in"})
 	}
 }
 

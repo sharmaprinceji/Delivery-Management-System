@@ -10,6 +10,7 @@ type Storage interface {
 	GetCheckedInAgents() ([]types.Agent, error)
 	GetUnassignedOrders() ([]types.Order, error)
 	AssignOrderToAgent(orderID int64, agentID int64) error
+	CheckInAgent(agent types.Agent) error
 
 	// Optional schema setup (used in SQLite for migration)
 	InitSchema() error

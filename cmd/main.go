@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	//"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,7 +12,9 @@ import (
 	"time"
 
 	"github.com/sharmaprinceji/delivery-management-system/internal/config"
-	"github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
+	 "github.com/sharmaprinceji/delivery-management-system/internal/router"
+	// "github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
+	//"github.com/sharmaprinceji/delivery-management-system/internal/router/orderRoute"
 )
 
 func main() {
@@ -21,17 +22,15 @@ func main() {
 	cfg := config.MustLoad() /// 👈 call only once here
 
 	//seprate db setup ..
-	
-	route:=agentroute.StudentRouter();
+	//route:=agentroute.AgentRouter();
+	//route := orderroute.OrderRouter() // 👈 call only once here
+	route,_ := router.StudentRoute() // 👈 call only once here
 
 	//setup server.
 	server := http.Server{
 		Addr:    cfg.HTTPServer.Addr,
 		Handler: route,
 	}
-
-	//StartCronJob
-	//scheduler.StartStudentFetchJob()
 
 	slog.Info("Starting server...", slog.String("address", cfg.HTTPServer.Addr))
 
