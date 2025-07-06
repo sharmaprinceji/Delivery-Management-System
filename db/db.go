@@ -1,6 +1,8 @@
 package db
 
 import (
+	"log"
+
 	"github.com/sharmaprinceji/delivery-management-system/internal/config"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage/sqlite"
@@ -9,7 +11,8 @@ import (
 func Mydb(cfg *config.Config) (storage.Storage, error) {
 	st, err := sqlite.New(cfg) // Make sure sqlite.New accepts *config.Config too
 	if err != nil {
-		return nil, err
+		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	return st, nil
+	return st,nil
 }
+

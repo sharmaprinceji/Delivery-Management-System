@@ -19,6 +19,9 @@ import (
 func main() {
 	//loadConfig()
 	cfg := config.MustLoad() /// 👈 call only once here
+
+	//seprate db setup ..
+	
 	route:=agentroute.StudentRouter();
 
 	//setup server.
