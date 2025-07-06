@@ -6,7 +6,6 @@ import (
 
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 	"github.com/sharmaprinceji/delivery-management-system/internal/types"
-	"github.com/sharmaprinceji/delivery-management-system/internal/jobs"
 )
 
 func AllocateOrders(s storage.Storage) error {

@@ -13,6 +13,7 @@ func Mydb(cfg *config.Config) (storage.Storage, error) {
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	//log.Printf("DB Path: %s\n", cfg.StoragePath)
 	return st,nil
 }
 

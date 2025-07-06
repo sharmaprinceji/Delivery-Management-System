@@ -17,7 +17,7 @@ type Sqlite struct {
 func (s *Sqlite) Save(data any) error {
 	switch v := data.(type) {
 	case types.Student:
-		_, err := s.Db.Exec(`INSERT INTO User(name, age, email, city) VALUES (?, ?, ?, ?)`,
+		_, err := s.Db.Exec(`INSERT INTO Users (name, age, email, city) VALUES (?, ?, ?, ?)`,
 			v.Name, v.Age, v.Email, v.City)
 		return err
 	default:
@@ -31,7 +31,7 @@ func New(cfg *config.Config) (*Sqlite, error) {
 		return nil, err
 	}
 	
-	_,err=db.Exec(`CREATE TABLE IF NOT EXISTS User (
+	_,err=db.Exec(`CREATE TABLE IF NOT EXISTS Users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT,
 		age INTEGER,
@@ -49,7 +49,7 @@ func New(cfg *config.Config) (*Sqlite, error) {
 }
 
 func (s *Sqlite) CreateStudent(name string, email string, age int, city string) (int64, error) {
-	stmt, err := s.Db.Prepare("INSERT INTO User(name, email, age, city) VALUES(?, ?, ?, ?)")
+	stmt, err := s.Db.Prepare("INSERT INTO Users (name, email, age, city) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		return 0, err
 	}
@@ -69,7 +69,7 @@ func (s *Sqlite) CreateStudent(name string, email string, age int, city string) 
 }
 
 func (s *Sqlite) GetStudentById(id int64) (types.Student, error) {
-	stmt, err := s.Db.Prepare("SELECT * FROM User WHERE id = ? LIMIT 1")
+	stmt, err := s.Db.Prepare("SELECT * FROM Users WHERE id = ? LIMIT 1")
 	if err != nil {
 		return types.Student{}, err
 	}

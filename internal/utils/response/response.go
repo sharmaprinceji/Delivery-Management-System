@@ -41,7 +41,7 @@ func ValidationError(errs  validator.ValidationErrors) Response {
 		case "required":
 			errMsgs = append(errMsgs, fmt.Sprintf("field %s is required", err.Field()))
 		default:
-			errMsgs = append(errMsgs, fmt.Sprintf("field %s failed validation for tag %s", err.Field()))
+			errMsgs = append(errMsgs, fmt.Sprintf("field %s failed validation for tag\n", err.Field()))
 		}
 	}
 

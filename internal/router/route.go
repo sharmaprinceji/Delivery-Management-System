@@ -3,9 +3,11 @@ package router
 import (
 	"log"
 	"net/http"
+	// "time"
 
 	"github.com/sharmaprinceji/delivery-management-system/db"
 	"github.com/sharmaprinceji/delivery-management-system/internal/config"
+	"github.com/sharmaprinceji/delivery-management-system/internal/schedular"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 )
 
@@ -22,23 +24,13 @@ func StudentRoute() (*http.ServeMux,storage.Storage){
 	
 	log.Println("Db connection on..", cfg.HTTPServer.Addr)
     
-	err:= storage.InitSchema()
+	er:= storage.InitSchema()
+
+    if er != nil {
+		log.Fatalf("schema error: %v", er)
+	}
+
+    schedular.SchedularJob(storage)
 	
-    if err != nil {
-		log.Fatalf("schema error: %v", err)
-	}
-
-	for {
-		now := time.Now()
-		if now.Hour() == 7 {
-			log.Println("Running allocation job...")
-			err := jobs.AllocateOrders(storage)
-			if err != nil {
-				log.Printf("Job failed: %v", err)
-			}
-		}
-		time.Sleep(time.Minute * 10)
-	}
-
 	return router,storage;
 }
