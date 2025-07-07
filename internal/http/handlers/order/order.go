@@ -35,7 +35,7 @@ func CreateOrder(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		response.WriteJSON(w, http.StatusCreated, map[string]int64{"id": id})
+		response.WriteJSON(w, http.StatusCreated, map[string]int64{"Order has been created successfully with id": id})
 	}
 }
 
@@ -63,7 +63,7 @@ func CreateBulkOrders(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		response.WriteJSON(w, http.StatusCreated, map[string]int{"inserted": count})
+		response.WriteJSON(w, http.StatusCreated, map[string]int{"Ordered inserted ": count})
 	}
 }
 

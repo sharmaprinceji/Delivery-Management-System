@@ -116,7 +116,7 @@ func CreateWareHouse(storage storage.Storage) http.HandlerFunc {
 		}
 
 		slog.Info("warehouse created successfully", slog.Int64("id", id))
-		response.WriteJSON(w, http.StatusCreated, map[string]int64{"id": id})
+		response.WriteJSON(w, http.StatusCreated, map[string]int64{"warehouse created successfully with Id": id})
 	}
 }
 
@@ -141,8 +141,8 @@ func CheckedInAgents(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		slog.Info("Agent checked in", slog.Int64("id", id))
-		response.WriteJSON(w, http.StatusCreated, map[string]int64{"id": id})
+		slog.Info("Agent checked in successfully :", slog.Int64("id", id))
+		response.WriteJSON(w, http.StatusCreated, map[string]int64{"Agent checked successfully with Id": id})
 	}
 }
 
