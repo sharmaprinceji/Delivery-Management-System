@@ -33,9 +33,7 @@ build/
 dist/
 
 # config files
-/config
 
-/storage
 
 # OS-specific files
 .DS_Store

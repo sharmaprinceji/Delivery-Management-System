@@ -1,0 +1,16 @@
+env: "dev"
+storage_path: "./data/delivery.db"
+
+http_server:
+  address:  ":${PORT}" # Default port is 5002 if not set
+
+variables:
+  delivery:
+    max_daily_distance: "100.0"
+    max_daily_time: "600"
+    per_km_time: 5
+    min_earnings: 500
+    tier1_orders: 25
+    tier2_orders: 50
+    tier1_rate: 35
+    tier2_rate: 42
