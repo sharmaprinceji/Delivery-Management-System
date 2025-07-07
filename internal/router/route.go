@@ -14,31 +14,24 @@ import (
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 )
 
-func StudentRoute() (*http.ServeMux,storage.Storage){
-	router:=http.NewServeMux()
+// router/router.go
+func SetupRouter() (*http.ServeMux, storage.Storage) {
+	router := http.NewServeMux()
 	cfg := config.MustLoad()
 
-	storage, err := db.Mydb(cfg)
-
+	st, err := db.Mydb(cfg)
 	if err != nil {
 		log.Fatalf("failed to init DB: %v", err)
 	}
-
 	
 	log.Println("Db connection on..", cfg.HTTPServer.Addr)
-    
-	er:= storage.InitSchema()
 
-    if er != nil {
-		log.Fatalf("schema error: %v", er)
+	if err := st.InitSchema(); err != nil {
+		log.Fatalf("schema error: %v", err)
 	}
 
-    schedular.SchedularJob(storage);
+	schedular.SchedularJob(st)
 
-	//insert all specific router here..
-	//  _:=agentroute.AgentRouter()
-	//  _:=orderroute.OrderRouter()
-
-	
-	return router,storage;
+	return router, st
 }
+

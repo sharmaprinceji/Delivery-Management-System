@@ -8,8 +8,7 @@ import (
 	"log"
 	"log/slog"
 	"net/http"
-	"strconv"
-	"strings"
+	// "strconv"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
@@ -18,12 +17,12 @@ import (
 )
 
 
-func Create(storage storage.Storage) http.HandlerFunc {
+var validate = validator.New()
+func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var student types.Student
-		err := json.NewDecoder(r.Body).Decode(&student)
-		log.Printf("Received student data: %+v\n", student)
-		
+		var agent types.Agent
+
+		err := json.NewDecoder(r.Body).Decode(&agent)
 		if errors.Is(err, io.EOF) {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("request body is invalid")))
 			return
@@ -32,56 +31,96 @@ func Create(storage storage.Storage) http.HandlerFunc {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("failed to decode request body: %v", err)))
 			return
 		}
+		//debugging log
+         log.Printf("Received agent data: %+v\n", agent)
 
-		if err := validator.New().Struct(student); err != nil {
+		// Validation
+		if err := validate.Struct(agent); err != nil {
 			validateErrs := err.(validator.ValidationErrors)
 			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
 			return
 		}
 
-		id, err := storage.CreateStudent(
-			student.Name,
-			student.Email,
-			student.Age,
-			student.City,
-		)
-
+		// Call storage layer to mark agent as checked in
+		err = storage.CheckInAgent(agent)
 		if err != nil {
-			// Handle duplicate email error
-			if strings.Contains(err.Error(), "UNIQUE constraint failed") || strings.Contains(err.Error(), "duplicate key") {
-				response.WriteJSON(w, http.StatusConflict, response.GeneralError(fmt.Errorf("email already exists")))
-				return
-			}
-			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to create student: %v", err)))
+			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to check-in agent: %v", err)))
 			return
 		}
 
-		slog.Info("student created successfully", slog.Int64("id", id))
+		log.Printf("Agent checked in successfully: %+v", agent)
+		response.WriteJSON(w, http.StatusCreated, map[string]string{"status": "agent checked in"})
+	}
+}
+
+func GetAssignments(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		assignments, err := storage.GetAllAssignments()
+		if err != nil {
+			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to fetch assignments: %v", err)))
+			return
+		}
+		response.WriteJSON(w, http.StatusOK, assignments)
+	}
+}
+
+func CreateWareHouse(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var warehouse types.Warehouse
+
+		err := json.NewDecoder(r.Body).Decode(&warehouse)
+		if err != nil {
+			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("failed to decode request body: %v", err)))
+			return
+		}
+
+		// Validate the struct (assuming Lat/Lng is inside `Location`)
+		if err := validator.New().Struct(warehouse); err != nil {
+			validateErrs := err.(validator.ValidationErrors)
+			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
+			return
+		}
+
+		id, err := storage.CreateWarehouse(warehouse.Name, warehouse.Location)
+		if err != nil {
+			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to create warehouse: %v", err)))
+			return
+		}
+
+		slog.Info("warehouse created successfully", slog.Int64("id", id))
+		response.WriteJSON(w, http.StatusCreated, map[string]int64{"id": id})
+	}
+}
+
+func CheckedInAgents(storage storage.Storage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var agent types.Agent
+
+		if err := json.NewDecoder(r.Body).Decode(&agent); err != nil {
+			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("invalid request: %v", err)))
+			return
+		}
+
+		if err := validator.New().Struct(agent); err != nil {
+			validateErrs := err.(validator.ValidationErrors)
+			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
+			return
+		}
+
+		id, err := storage.CheckInAgents(agent.Name, agent.WarehouseID)
+		if err != nil {
+			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("check-in failed: %v", err)))
+			return
+		}
+
+		slog.Info("Agent checked in", slog.Int64("id", id))
 		response.WriteJSON(w, http.StatusCreated, map[string]int64{"id": id})
 	}
 }
 
 
-func GetById(storage storage.Storage) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id := r.PathValue("id")
-		if id == "" {
-			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("id is required")))
-			return
-		}
-        intid,err:=strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("invalid id format: %v", err)))
-			return
-		}
 
-		student, err := storage.GetStudentById(intid)
-		if err != nil {
-			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to get student: %v", err)))
-			return
-		}
 
-		response.WriteJSON(w, http.StatusOK, student)
-	}
-}
 
+
+ 

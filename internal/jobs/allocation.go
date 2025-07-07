@@ -53,7 +53,7 @@ func AllocateOrders(s storage.Storage) error {
 	return nil
 }
 
-// Haversine (simplified)
+// Haversine formula is typically used for calculating distances between two points on the Earth.
 func Distance(lat1, lng1, lat2, lng2 float64) float64 {
 	return 2.0 + math.Abs(lat1-lat2)+math.Abs(lng1-lng2)
 }
