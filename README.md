@@ -138,6 +138,9 @@ Min Agent Profit	₹500
 25+ orders	₹35/order
 50+ orders	₹42/order
 
+#Deployed Link:
+https://delivery-management-system-h5nh.onrender.com
+
 #end.....
 
 
