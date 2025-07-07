@@ -2,7 +2,8 @@ package storage
 
 
  import "github.com/sharmaprinceji/delivery-management-system/internal/types"
-
+ 
+//interface setup....
 type Storage interface {
 	Save(data any) error
 	GetCheckedInAgents() ([]types.Agent, error)
@@ -12,9 +13,6 @@ type Storage interface {
 	// GetAllAssignments() ([]types.Assignment, error)
 	GetPaginatedAssignments(limit, offset int) ([]types.Assignment, int, error)
 
-
-
-	// Optional schema setup..
 	InitSchema() error
 	CreateWarehouse(name string, location types.Location) (int64, error)
 	CheckInAgents(name string, warehouseID int64) (int64, error)

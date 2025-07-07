@@ -18,15 +18,15 @@ func SchedularJob(s storage.Storage) {
 			}
 			duration := next.Sub(now)
 
-			log.Printf("⏰ Allocation job scheduled at: %v", next)
+			log.Printf("Allocation job scheduled at: %v", next)
 
 			time.Sleep(duration)
 
-			log.Println("🚚 Running auto allocation job...")
+			log.Println("Running auto allocation job...")
 			if err := jobs.AllocateOrders(s); err != nil {
-				log.Printf("❌ Auto allocation error: %v", err)
+				log.Printf("Auto allocation error: %v", err)
 			} else {
-				log.Println("✅ Auto allocation completed.")
+				log.Println(" Auto allocation completed.")
 			}
 		}
 	}()

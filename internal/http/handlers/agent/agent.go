@@ -58,7 +58,6 @@ func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 
 func GetAssignments(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Parse query parameters: ?page=1&limit=10
 		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 		limitStr := r.URL.Query().Get("limit")
 		limit, err := strconv.Atoi(limitStr)
@@ -103,7 +102,7 @@ func CreateWareHouse(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		// Validate the struct (assuming Lat/Lng is inside `Location`)
+		// Validate the struct 
 		if err := validator.New().Struct(warehouse); err != nil {
 			validateErrs := err.(validator.ValidationErrors)
 			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))

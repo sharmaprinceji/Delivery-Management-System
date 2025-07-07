@@ -2,6 +2,7 @@ package types
 
 import "time"
 
+// User model (optional)
 type User struct {
 	ID    int64  `json:"id"`
 	Name  string `json:"name" validate:"required"`
@@ -50,6 +51,7 @@ type Assignment struct {
 	AssignedAt time.Time `json:"assigned_at"`
 }
 
+// AgentSummary model for paginated agent summaries
 type AgentSummary struct {
 	AgentID      int64   `json:"agent_id"`
 	TotalOrders  int     `json:"total_orders"`
@@ -58,12 +60,14 @@ type AgentSummary struct {
 	Profit       float64 `json:"profit"`
 }
 
+// PaginatedAgentSummary model for paginated agent summaries
 type PaginatedAgentSummary struct {
 	CurrentPage int              `json:"current_page"`
 	TotalPages  int              `json:"total_pages"`
 	Data        []AgentSummary  `json:"data"`
 }
 
+// SystemSummary model for overall system summary
 type SystemSummary struct {
 	TotalOrders      int                   `json:"total_orders"`
 	AssignedOrders   int                   `json:"assigned_orders"`

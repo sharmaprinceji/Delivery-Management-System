@@ -72,12 +72,12 @@ func ManualAllocation(s storage.Storage) http.HandlerFunc {
 		err := jobs.AllocateOrders(s)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("❌ Allocation failed: " + err.Error()))
+			w.Write([]byte(" Allocation failed: " + err.Error()))
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("✅ Allocation successful"))
+		w.Write([]byte("Allocation successful"))
 	}
 }
 
