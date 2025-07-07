@@ -16,7 +16,7 @@ type Sqlite struct {
 
 func (s *Sqlite) Save(data any) error {
 	switch v := data.(type) {
-	case types.Student:
+	case types.User:
 		_, err := s.Db.Exec(`INSERT INTO Users (name, age, email, city) VALUES (?, ?, ?, ?)`,
 			v.Name, v.Age, v.Email, v.City)
 		return err
@@ -48,9 +48,6 @@ func New(cfg *config.Config) (*Sqlite, error) {
 	}, nil
 }
 
-
-
-
 func (s *Sqlite) InitSchema() error {
 	queries := []string{
 		`CREATE TABLE IF NOT EXISTS warehouses (
@@ -79,6 +76,14 @@ func (s *Sqlite) InitSchema() error {
 			FOREIGN KEY (warehouse_id) REFERENCES warehouses(id),
 			FOREIGN KEY (agent_id) REFERENCES agents(id)
         );`,
+
+		`CREATE TABLE IF NOT EXISTS assignments (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			agent_id INTEGER NOT NULL,
+			order_id INTEGER NOT NULL,
+			assigned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	   );
+		`,
 	}
 
 	for _, q := range queries {
@@ -89,7 +94,6 @@ func (s *Sqlite) InitSchema() error {
 	}
 	return nil
 }
-
 
 func (s *Sqlite) GetCheckedInAgents() ([]types.Agent, error) {
 	rows, err := s.Db.Query("SELECT id, name, warehouse_id, checked_in FROM agents WHERE checked_in = 1")
@@ -147,9 +151,26 @@ func (s *Sqlite) GetUnassignedOrders() ([]types.Order, error) {
 }
 
 func (s *Sqlite) AssignOrderToAgent(orderID int64, agentID int64) error {
-	_, err := s.Db.Exec(`UPDATE orders SET assigned = 1, agent_id = ? WHERE id = ?`, agentID, orderID)
-	return err
+	tx, err := s.Db.Begin()
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`UPDATE orders SET assigned = 1, agent_id = ? WHERE id = ?`, agentID, orderID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`INSERT INTO assignments (agent_id, order_id) VALUES (?, ?)`, agentID, orderID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }
+
 
 func (s *Sqlite) CheckInAgent(agent types.Agent) error {
 	_, err := s.Db.Exec(`
@@ -161,26 +182,58 @@ func (s *Sqlite) CheckInAgent(agent types.Agent) error {
 }
 
 func (s *Sqlite) GetAllAssignments() ([]types.Assignment, error) {
-	rows, err := s.Db.Query(`
-		SELECT id, agent_id, order_id, assigned_at
-		FROM assignments
-		ORDER BY assigned_at DESC
-	`)
+	rows, err := s.Db.Query("SELECT id, agent_id, order_id, assigned_at FROM assignments")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var assignments []types.Assignment
+	var results []types.Assignment
 	for rows.Next() {
 		var a types.Assignment
-		if err := rows.Scan(&a.ID, &a.AgentID, &a.OrderID, &a.AssignedAt); err != nil {
+		err := rows.Scan(&a.ID, &a.AgentID, &a.OrderID, &a.AssignedAt)
+		if err != nil {
 			return nil, err
 		}
-		assignments = append(assignments, a)
+		results = append(results, a)
 	}
-	return assignments, nil
+	return results, nil
 }
+
+func (s *Sqlite) GetPaginatedAssignments(limit, offset int) ([]types.Assignment, int, error) {
+	rows, err := s.Db.Query(`
+		SELECT id, agent_id, order_id, assigned_at
+		FROM assignments
+		ORDER BY assigned_at DESC
+		LIMIT ? OFFSET ?
+	`, limit, offset)
+
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var result []types.Assignment
+	for rows.Next() {
+		var a types.Assignment
+		err := rows.Scan(&a.ID, &a.AgentID, &a.OrderID, &a.AssignedAt)
+		if err != nil {
+			return nil, 0, err
+		}
+		result = append(result, a)
+	}
+
+	// Get total count
+	var total int
+	err = s.Db.QueryRow(`SELECT COUNT(*) FROM assignments`).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return result, total, nil
+}
+
+
 
 func (s *Sqlite) CreateWarehouse(name string, location types.Location) (int64, error) {
 	stmt, err := s.Db.Prepare(`
@@ -374,7 +427,7 @@ func (s *Sqlite) GetAgentSummaryPaginated(page int, limit int) (types.PaginatedA
 	}, nil
 }
 
-func (s *Sqlite) GetSystemSummary() (types.SystemSummary, error) {
+func (s *Sqlite) GetSystemSummaryPaginated(page, limit int) (types.SystemSummary, error) {
 	var summary types.SystemSummary
 
 	err := s.Db.QueryRow("SELECT COUNT(*) FROM orders").Scan(&summary.TotalOrders)
@@ -389,11 +442,12 @@ func (s *Sqlite) GetSystemSummary() (types.SystemSummary, error) {
 
 	summary.DeferredOrders = summary.TotalOrders - summary.AssignedOrders
 
-	agentUtil, err := s.GetAgentSummary()
+	// Fetch paginated utilization
+	util, err := s.GetAgentSummaryPaginated(page, limit)
 	if err != nil {
 		return summary, err
 	}
 
-	summary.AgentUtilization = agentUtil
+	summary.AgentUtilization = util
 	return summary, nil
 }

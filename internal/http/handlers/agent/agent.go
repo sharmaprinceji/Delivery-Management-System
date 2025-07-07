@@ -7,7 +7,10 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"math"
 	"net/http"
+	"strconv"
+
 	// "strconv"
 
 	"github.com/go-playground/validator/v10"
@@ -16,8 +19,8 @@ import (
 	"github.com/sharmaprinceji/delivery-management-system/internal/utils/response"
 )
 
-
 var validate = validator.New()
+
 func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var agent types.Agent
@@ -32,7 +35,7 @@ func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 		//debugging log
-         log.Printf("Received agent data: %+v\n", agent)
+		log.Printf("Received agent data: %+v\n", agent)
 
 		// Validation
 		if err := validate.Struct(agent); err != nil {
@@ -55,12 +58,38 @@ func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 
 func GetAssignments(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		assignments, err := storage.GetAllAssignments()
+		// Parse query parameters: ?page=1&limit=10
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+		limitStr := r.URL.Query().Get("limit")
+		limit, err := strconv.Atoi(limitStr)
+
+		if err != nil || limit <= 0 {
+			limit = 10
+		}
+
+		if page < 1 {
+			page = 1
+		}
+		if limit < 1 {
+			limit = 10
+		}
+
+		offset := (page - 1) * limit
+
+		assignments, total, err := storage.GetPaginatedAssignments(limit, offset)
 		if err != nil {
 			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to fetch assignments: %v", err)))
 			return
 		}
-		response.WriteJSON(w, http.StatusOK, assignments)
+
+		totalPages := int(math.Ceil(float64(total) / float64(limit)))
+
+		response.WriteJSON(w, http.StatusOK, map[string]any{
+			"current_page": page,
+			"total_pages":  totalPages,
+			"total_items":  total,
+			"data":         assignments,
+		})
 	}
 }
 
@@ -117,10 +146,3 @@ func CheckedInAgents(storage storage.Storage) http.HandlerFunc {
 		response.WriteJSON(w, http.StatusCreated, map[string]int64{"id": id})
 	}
 }
-
-
-
-
-
-
- 

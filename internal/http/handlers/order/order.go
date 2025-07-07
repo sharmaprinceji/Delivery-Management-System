@@ -105,7 +105,14 @@ func GetAgentSummary(storage storage.Storage) http.HandlerFunc {
 
 func GetSystemSummary(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		summary, err := storage.GetSystemSummary()
+		pageStr := r.URL.Query().Get("page")
+		page := 1
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+		limit := 10
+
+		summary, err := storage.GetSystemSummaryPaginated(page, limit)
 		if err != nil {
 			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to get system summary: %v", err)))
 			return

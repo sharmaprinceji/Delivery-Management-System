@@ -2,7 +2,7 @@ package types
 
 import "time"
 
-type Student struct {
+type User struct {
 	ID    int64  `json:"id"`
 	Name  string `json:"name" validate:"required"`
 	Age   int    `json:"age" validate:"required"`
@@ -65,9 +65,9 @@ type PaginatedAgentSummary struct {
 }
 
 type SystemSummary struct {
-	TotalOrders     int                  `json:"total_orders"`
-	AssignedOrders  int                  `json:"assigned_orders"`
-	DeferredOrders  int                  `json:"deferred_orders"`
-	AgentUtilization []AgentSummary      `json:"agent_utilization"`
+	TotalOrders      int                   `json:"total_orders"`
+	AssignedOrders   int                   `json:"assigned_orders"`
+	DeferredOrders   int                   `json:"deferred_orders"`
+	AgentUtilization PaginatedAgentSummary `json:"agent_utilization"`
 }
 
