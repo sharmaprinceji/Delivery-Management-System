@@ -2,7 +2,7 @@ package storage
 
 
  import "github.com/sharmaprinceji/delivery-management-system/internal/types"
- 
+
 //interface setup....
 type Storage interface {
 	Save(data any) error

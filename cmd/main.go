@@ -27,12 +27,22 @@ func main() {
 
 	agentroute.RegisterAgentRoutes(route, storage)
 	orderroute.RegisterOrderRoutes(route, storage)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "5002" // fallback
+	}
 	
-	//setup server.
 	server := http.Server{
-		Addr:    cfg.HTTPServer.Addr,
+		Addr: ":" + port,
 		Handler: route,
 	}
+	
+	//setup server.
+	// server := http.Server{
+	// 	Addr:    cfg.HTTPServer.Addr,
+	// 	Handler: route,
+	// }
 
 	slog.Info("Starting server...", slog.String("address", cfg.HTTPServer.Addr))
 
