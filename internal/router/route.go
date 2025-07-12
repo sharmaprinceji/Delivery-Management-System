@@ -18,8 +18,7 @@ func SetupRouter() (*mux.Router, storage.Storage) {
 	if err != nil {
 		log.Fatalf("failed to init DB: %v", err)
 	}
-
-	log.Println("Db connection on..", cfg.HTTPServer.Addr)
+	log.Println("DB connection on..", cfg.HTTPServer.Addr)
 
 	if err := st.InitSchema(); err != nil {
 		log.Fatalf("schema error: %v", err)
