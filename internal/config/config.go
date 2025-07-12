@@ -1,8 +1,6 @@
 package config
 
-
 import (
-	"flag"
 	"log"
 	"os"
 	"sync"
@@ -15,9 +13,9 @@ type HTTPServer struct {
 }
 
 type Config struct {
-	Env         string      `yaml:"env" env:"ENV" env-required:"true"`
-	StoragePath string      `yaml:"storage_path" env-required:"true"`
-	HTTPServer  HTTPServer  `yaml:"http_server"`
+	Env         string     `yaml:"env" env-required:"true"`
+	StoragePath string     `yaml:"storage_path" env-required:"true"`
+	HTTPServer  HTTPServer `yaml:"http_server"`
 }
 
 var (
@@ -27,16 +25,8 @@ var (
 
 func MustLoad() *Config {
 	once.Do(func() {
-		var configPath = os.Getenv("CONFIG_PATH")
-
-		if configPath == "" {
-			flag.StringVar(&configPath, "config", "", "Path to configuration file")
-			flag.Parse()
-		}
-
-		if configPath == "" {
-			log.Fatal("CONFIG_PATH environment variable or --config flag must be set")
-		}
+		// Hardcoded fallback config path
+		const configPath = "config/local.yaml"
 
 		if _, err := os.Stat(configPath); os.IsNotExist(err) {
 			log.Fatalf("Configuration file does not exist: %s", configPath)
