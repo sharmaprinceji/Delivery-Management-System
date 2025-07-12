@@ -26,7 +26,7 @@ import (
 // @description API for managing delivery agents, orders and allocation system
 // @contact.name Prince Raj
 // @contact.email princesh1411@gmail.com
-// @host delivery-management-system-h5nh.onrender.com
+// @host delivery-management-system-h5nh.onrender.com/swagger
 // @BasePath /
 func main() {
 	//cfg := config.MustLoad()
