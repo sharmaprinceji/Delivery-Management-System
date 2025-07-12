@@ -26,7 +26,7 @@ import (
 // @description API for managing delivery agents, orders and allocation system
 // @contact.name Prince Raj
 // @contact.email princesh1411@gmail.com
-// @host delivery-management-system-h5nh.onrender.com/swagger
+// @host delivery-management-system-h5nh.onrender.com
 // @BasePath /
 func main() {
 	//cfg := config.MustLoad()
@@ -41,7 +41,7 @@ func main() {
 	orderroute.RegisterOrderRoutes(route, storage)
 
 	// Swagger route
-	route.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	route.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
