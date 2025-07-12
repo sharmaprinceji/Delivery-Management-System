@@ -95,7 +95,7 @@ definitions:
     - location
     - name
     type: object
-host: delivery-management-system-h5nh.onrender.com/swagger
+host: delivery-management-system-h5nh.onrender.com
 info:
   contact:
     email: princesh1411@gmail.com
