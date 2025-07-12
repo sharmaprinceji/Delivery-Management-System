@@ -25,7 +25,7 @@ import (
 // @description API for managing delivery agents, orders and allocation system
 // @contact.name Prince Raj
 // @contact.email princesh1411@gmail.com
-// @host localhost:5002
+// @host delivery-management-system-h5nh.onrender.com
 // @BasePath /
 func main() {
 	//cfg := config.MustLoad()
@@ -81,24 +81,31 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		// Allow if coming from frontend or swagger UI hosted at Render
-		if origin == "https://delivery-management-system-h5nh.onrender.com" ||
-			origin == "http://localhost:5002" ||
-			origin == "https://delivery-management-system-h5nh.onrender.com/swagger" {
+	
+		allowedOrigins := map[string]bool{
+			"https://delivery-management-system-h5nh.onrender.com": true,
+			"http://localhost:5002":                                 true,
+			"https://delivery-management-system-h5nh.onrender.com/swagger": true,
+		}
 
+		// If the origin is allowed, set appropriate headers
+		if allowedOrigins[origin] {
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
 
+		// Set headers required for preflight and CORS
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
+		// Handle preflight requests
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
 
+		// Continue to next handler
 		next.ServeHTTP(w, r)
 	})
 }

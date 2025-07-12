@@ -9,7 +9,7 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:5002",
+    "host": "delivery-management-system-h5nh.onrender.com",
     "basePath": "/",
     "paths": {
         "/api/agent-summary": {
