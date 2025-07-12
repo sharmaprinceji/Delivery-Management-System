@@ -30,6 +30,13 @@ definitions:
       total_orders:
         type: integer
     type: object
+  types.BulkOrderRequest:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/types.OrderRequest'
+        type: array
+    type: object
   types.Location:
     properties:
       lat:
@@ -91,7 +98,7 @@ definitions:
 host: localhost:5002
 info:
   contact:
-    email: prince@example.com
+    email: princesh1411@gmail.com
     name: Prince Raj
   description: API for managing delivery agents, orders and allocation system
   title: Delivery Management System API
@@ -275,9 +282,7 @@ paths:
         name: orders
         required: true
         schema:
-          items:
-            $ref: '#/definitions/types.OrderRequest'
-          type: array
+          $ref: '#/definitions/types.BulkOrderRequest'
       produces:
       - application/json
       responses:

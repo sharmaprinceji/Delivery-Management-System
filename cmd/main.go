@@ -11,8 +11,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	// "github.com/rs/cors"
-	//"github.com/sharmaprinceji/delivery-management-system/internal/config"
 	"github.com/sharmaprinceji/delivery-management-system/internal/router"
 
 	"github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
@@ -26,7 +24,7 @@ import (
 // @version 1.0
 // @description API for managing delivery agents, orders and allocation system
 // @contact.name Prince Raj
-// @contact.email prince@example.com
+// @contact.email princesh1411@gmail.com
 // @host localhost:5002
 // @BasePath /
 func main() {
@@ -83,15 +81,18 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
 
-		// Allow specific domains only
-		if origin == "https://delivery-management-system-h5nh.onrender.com" || origin == "http://localhost:5002" {
+		// Allow if coming from frontend or swagger UI hosted at Render
+		if origin == "https://delivery-management-system-h5nh.onrender.com" ||
+			origin == "http://localhost:5002" ||
+			origin == "https://delivery-management-system-h5nh.onrender.com/swagger" {
+
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Vary", "Origin")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
 
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Credentials", "true") // only if needed
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -101,4 +102,5 @@ func corsMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
 

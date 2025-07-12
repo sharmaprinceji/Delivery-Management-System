@@ -8,7 +8,7 @@ import (
 
 func RegisterAgentRoutes(router *mux.Router, storage storage.Storage) {
 	router.HandleFunc("/api/warehouse", agent.CreateWareHouse(storage)).Methods("POST")
-	router.HandleFunc("/api/checkin", agent.CheckedInAgents(storage)).Methods("POST")
+	router.HandleFunc("/api/agent/checkin", agent.CheckedInAgents(storage)).Methods("POST")
 	router.HandleFunc("/api/checkin", agent.CheckInAgent(storage)).Methods("GET")
 	router.HandleFunc("/api/assignments", agent.GetAssignments(storage)).Methods("GET")
 }

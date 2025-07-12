@@ -5,7 +5,7 @@
         "title": "Delivery Management System API",
         "contact": {
             "name": "Prince Raj",
-            "email": "prince@example.com"
+            "email": "princesh1411@gmail.com"
         },
         "version": "1.0"
     },
@@ -286,10 +286,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/types.OrderRequest"
-                            }
+                            "$ref": "#/definitions/types.BulkOrderRequest"
                         }
                     }
                 ],
@@ -449,6 +446,17 @@
                 },
                 "total_orders": {
                     "type": "integer"
+                }
+            }
+        },
+        "types.BulkOrderRequest": {
+            "type": "object",
+            "properties": {
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.OrderRequest"
+                    }
                 }
             }
         },

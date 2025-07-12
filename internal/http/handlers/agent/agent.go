@@ -34,31 +34,34 @@ var validate = validator.New()
 // @Router /api/warehouse [post]
 func CreateWareHouse(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var warehouse types.Warehouse
+		var req types.WarehouseRequest // ✅ Correct type for Swagger match
 
-		err := json.NewDecoder(r.Body).Decode(&warehouse)
+		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("failed to decode request body: %v", err)))
 			return
 		}
 
 		// Validate the struct 
-		if err := validator.New().Struct(warehouse); err != nil {
+		if err := validator.New().Struct(req); err != nil {
 			validateErrs := err.(validator.ValidationErrors)
 			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
 			return
 		}
 
-		id, err := storage.CreateWarehouse(warehouse.Name, warehouse.Location)
+		id, err := storage.CreateWarehouse(req.Name, req.Location)
 		if err != nil {
 			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to create warehouse: %v", err)))
 			return
 		}
 
 		slog.Info("warehouse created successfully", slog.Int64("id", id))
-		response.WriteJSON(w, http.StatusCreated, map[string]int64{"warehouse created successfully with Id": id})
+		response.WriteJSON(w, http.StatusCreated, map[string]int64{
+			"warehouse created successfully with Id": id,
+		})
 	}
 }
+
 
 // CheckedInAgents godoc
 // @Summary Check-in an agent
@@ -73,20 +76,20 @@ func CreateWareHouse(storage storage.Storage) http.HandlerFunc {
 // @Router /api/agent/checkin [post]
 func CheckedInAgents(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var agent types.Agent
+		var req types.AgentCheckInRequest
 
-		if err := json.NewDecoder(r.Body).Decode(&agent); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("invalid request: %v", err)))
 			return
 		}
 
-		if err := validator.New().Struct(agent); err != nil {
+		if err := validator.New().Struct(req); err != nil {
 			validateErrs := err.(validator.ValidationErrors)
 			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
 			return
 		}
 
-		id, err := storage.CheckInAgents(agent.Name, agent.WarehouseID)
+		id, err := storage.CheckInAgents(req.Name, req.WarehouseID)
 		if err != nil {
 			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("check-in failed: %v", err)))
 			return
@@ -122,8 +125,8 @@ func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("failed to decode request body: %v", err)))
 			return
 		}
-		//debugging log
-		log.Printf("Received agent data: %+v\n", agent)
+		
+		// log.Printf("Received agent data: %+v\n", agent)
 
 		// Validation
 		if err := validate.Struct(agent); err != nil {
@@ -180,7 +183,6 @@ func GetAssignments(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		// Convert to formatted response
 		var formatted []types.AssignmentResponse
 		for _, a := range assignments {
 			formatted = append(formatted, types.AssignmentResponse{

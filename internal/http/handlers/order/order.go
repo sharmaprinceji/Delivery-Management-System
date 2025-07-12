@@ -27,13 +27,14 @@ import (
 // @Router /api/order [post]
 func CreateOrder(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.OrderRequest
+		var req types.OrderRequest 
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("invalid request: %v", err)))
 			return
 		}
 
+	
 		if err := validator.New().Struct(req); err != nil {
 			validationErrs := err.(validator.ValidationErrors)
 			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validationErrs))
@@ -54,11 +55,13 @@ func CreateOrder(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
+	
 		response.WriteJSON(w, http.StatusCreated, map[string]int64{
 			"Order has been created successfully with id": id,
 		})
 	}
 }
+
 
 
 // CreateBulkOrders godoc
@@ -67,27 +70,38 @@ func CreateOrder(storage storage.Storage) http.HandlerFunc {
 // @Tags Orders
 // @Accept json
 // @Produce json
-// @Param orders body []types.OrderRequest true "List of order requests"
+// @Param orders body types.BulkOrderRequest true "List of order requests"
 // @Success 201 {object} map[string]int
 // @Failure 400 {object} response.Response
 // @Failure 500 {object} response.Response
 // @Router /api/orders/bulk [post]
 func CreateBulkOrders(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var orders []types.Order
+		var req types.BulkOrderRequest
 
-		if err := json.NewDecoder(r.Body).Decode(&orders); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("invalid request body: %v", err)))
 			return
 		}
 
 		validate := validator.New()
-
-		for i, order := range orders {
+		for i, order := range req.Orders {
 			if err := validate.Struct(order); err != nil {
 				response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("validation failed at index %d: %v", i, err)))
 				return
 			}
+		}
+
+	
+		var orders []types.Order
+		for _, o := range req.Orders {
+			orders = append(orders, types.Order{
+				Customer:    o.Customer,
+				Lat:         o.Lat,
+				Lng:         o.Lng,
+				WarehouseID: o.WarehouseID,
+				Assigned:    false,
+			})
 		}
 
 		count, err := storage.CreateBulkOrders(orders)
@@ -99,6 +113,8 @@ func CreateBulkOrders(storage storage.Storage) http.HandlerFunc {
 		response.WriteJSON(w, http.StatusCreated, map[string]int{"Ordered inserted": count})
 	}
 }
+
+
 
 
 // ManualAllocation godoc

@@ -11,7 +11,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "contact": {
             "name": "Prince Raj",
-            "email": "prince@example.com"
+            "email": "princesh1411@gmail.com"
         },
         "version": "{{.Version}}"
     },
@@ -292,10 +292,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/types.OrderRequest"
-                            }
+                            "$ref": "#/definitions/types.BulkOrderRequest"
                         }
                     }
                 ],
@@ -455,6 +452,17 @@ const docTemplate = `{
                 },
                 "total_orders": {
                     "type": "integer"
+                }
+            }
+        },
+        "types.BulkOrderRequest": {
+            "type": "object",
+            "properties": {
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.OrderRequest"
+                    }
                 }
             }
         },
