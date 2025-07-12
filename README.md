@@ -22,33 +22,55 @@ A simplified last-mile delivery management system to assign orders to agents bas
 ### 🔁 Clone & Run
 
 ```bash
-git clone https://github.com/your-username/delivery-management-system.git
+https://github.com/sharmaprinceji/Delivery-Management-System/
 cd delivery-management-system
 go mod tidy
+swag init --generalInfo cmd/main.go
+go build -o out ./cmd/main.go && ./out --config=config/local.yaml
+or
 go run cmd/main.go --config=config/local.yaml
 
+```
 
 Required Project Structure:
 delivery-management-system/
 │
 ├── cmd/
-│   └── main.go
+│   └── main.go                        
+│
 ├── config/
-│   └── local.yaml
+│   └── local.yaml                      
+├── db/
+│   └── sqlite.go                       # SQLite DB connection and setup
+│
 ├── internal/
-│   ├── types/
-│   ├── storage/
+│   ├── config/                         # Config loading logic
 │   ├── http/
+│   │   └── handlers/
+│   │       ├── agent/                 # Agent-related HTTP handlers
+│   │       └── order/                 # Order-related HTTP handlers
+│   │
+│   ├── jobs/                           # Background job logic
 │   ├── router/
-│   ├── schedular/
-│   └── jobs/
-└── db/
-    └── sqlite.go
+│   │   ├── agentRoute/                # Agent route definitions
+│   │   ├── orderRoute/                # Order route definitions
+│   │   └── router.go                  # SetupRouter function
+│   │
+│   ├── schedular/                      # Scheduler logic (e.g., cron jobs)
+│   ├── storage/                        # Interfaces and DB methods
+│   └── types/                          # Struct definitions and validation tags
+│
+├── docs/                               # Swagger-generated docs (optional)
+│
+├── go.mod
+├── go.sum
+└── README.md                          
+
 
 
 #System Setup Flow
-Follow the below route flow in sequence to fully simulate the system:
-1.Agent Check-In:
+Follow the route flow below in sequence to fully simulate the system:
+1. Agent Check-In:
 POST /api/checkin
 payload:
 {
@@ -56,10 +78,10 @@ payload:
   "warehouse_id": 1
 }
 
-2.Check Agent Assignments:
+2. Check Agent Assignments:
 GET /api/assignments?page=1&limit=3
 
-3.Create Warehouse:
+3. Create Warehouse:
 POST /api/warehouse
 payload:
 {
@@ -71,10 +93,10 @@ payload:
 }
 
 
-4.Check-in Agent Again (After Warehouse):
-POST /api/checkin
+4. Check-in Agent Again (After Warehouse):
+POST /api/agent/checkin
 
-5.Create a Single Order:
+5. Create a Single Order:
 POST /api/order
 payload:
 {
@@ -85,7 +107,7 @@ payload:
 }
 
 6. Bulk Create Orders:
-POST /api/orders
+POST /api/orders/bulk
 payload:
 [
   {
@@ -105,7 +127,7 @@ payload:
 7. Trigger Manual Allocation:
 GET /api/allocate
 
-8.Get Agent Utilization Summary (with pagination):
+8. Get Agent Utilization Summary (with pagination):
 GET /api/agent-summary?page=1
 response:
 [
