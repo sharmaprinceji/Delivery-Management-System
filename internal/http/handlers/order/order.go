@@ -145,7 +145,7 @@ func GetAgentSummary(storage storage.Storage) http.HandlerFunc {
 			}
 		}
 
-		limit := 10 // fixed limit per page
+		limit := 10 
 		summaries, err := storage.GetAgentSummaryPaginated(page, limit)
 		if err != nil {
 			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to fetch summary: %v", err)))

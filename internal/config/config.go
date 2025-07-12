@@ -29,21 +29,17 @@ func MustLoad() *Config {
 	once.Do(func() {
 		// var configPath string
 
-		// Priority 1: CONFIG_PATH environment variable
 		var configPath = os.Getenv("CONFIG_PATH")
 
-		// Priority 2: --config flag
 		if configPath == "" {
 			flag.StringVar(&configPath, "config", "", "Path to configuration file")
 			flag.Parse()
 		}
 
-		// Error if config path not found
 		if configPath == "" {
 			log.Fatal("CONFIG_PATH environment variable or --config flag must be set")
 		}
 
-		// Validate file existence
 		if _, err := os.Stat(configPath); os.IsNotExist(err) {
 			log.Fatalf("Configuration file does not exist: %s", configPath)
 		}

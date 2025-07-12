@@ -27,7 +27,7 @@ func AllocateOrders(s storage.Storage) error {
 				continue
 			}
 
-			d := Distance(order.Lat, order.Lng, 0, 0) // mock coords
+			d := Distance(order.Lat, order.Lng, 0, 0) 
 			if agentDistance[agent.ID]+d > MaxKm {
 				continue
 			}
@@ -45,7 +45,6 @@ func AllocateOrders(s storage.Storage) error {
 		}
 	}
 
-	// Summary
 	for id, list := range agentOrders {
 		fmt.Printf("Agent %d assigned %d orders\n", id, len(list))
 	}
@@ -53,7 +52,7 @@ func AllocateOrders(s storage.Storage) error {
 	return nil
 }
 
-// Haversine formula is typically used for calculating distances between two points on the Earth.
+
 func Distance(lat1, lng1, lat2, lng2 float64) float64 {
 	return 2.0 + math.Abs(lat1-lat2)+math.Abs(lng1-lng2)
 }

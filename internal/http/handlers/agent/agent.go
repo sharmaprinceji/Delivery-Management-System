@@ -132,7 +132,6 @@ func CheckInAgent(storage storage.Storage) http.HandlerFunc {
 			return
 		}
 
-		// Call storage layer to mark agent as checked in
 		err = storage.CheckInAgent(agent)
 		if err != nil {
 			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to check-in agent: %v", err)))
