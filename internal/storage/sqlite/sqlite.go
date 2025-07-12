@@ -171,14 +171,48 @@ func (s *Sqlite) AssignOrderToAgent(orderID int64, agentID int64) error {
 	return tx.Commit()
 }
 
+// After:
+func (s *Sqlite) GetAgentDetails(agentID int64) (map[string]interface{}, error) {
+	query := `
+		SELECT 
+			a.id AS agent_id,
+			a.name AS agent_name,
+			a.warehouse_id,
+			w.name AS warehouse_name,
+			COUNT(o.id) AS total_orders,
+			IFNULL(SUM(o.lat + o.lng), 0) AS total_km,
+			IFNULL(SUM(o.lat + o.lng)/0.5, 0) AS total_minutes, 
+			IFNULL(SUM(o.lat + o.lng)*2, 0) AS profit          
+		FROM agents a
+		LEFT JOIN warehouses w ON a.warehouse_id = w.id
+		LEFT JOIN orders o ON o.agent_id = a.id
+		WHERE a.id = ?
+		GROUP BY a.id, a.name, a.warehouse_id, w.name;
+	`
 
-func (s *Sqlite) CheckInAgent(agent types.Agent) error {
-	_, err := s.Db.Exec(`
-		INSERT INTO agents (name, warehouse_id, checked_in)
-		VALUES (?, ?, 1)
-		ON CONFLICT(name, warehouse_id) DO UPDATE SET checked_in = 1
-	`, agent.Name, agent.WarehouseID)
-	return err
+	row := s.Db.QueryRow(query, agentID)
+
+	var result = make(map[string]interface{})
+	var name, warehouseName string
+	var warehouseID int64
+	var totalOrders int
+	var totalKm, totalMinutes, profit float64
+
+	err := row.Scan(&agentID, &name, &warehouseID, &warehouseName, &totalOrders, &totalKm, &totalMinutes, &profit)
+	if err != nil {
+		return nil, err
+	}
+
+	result["agent_id"] = agentID
+	result["agent_name"] = name
+	result["warehouse_id"] = warehouseID
+	result["warehouse_name"] = warehouseName
+	result["total_orders"] = totalOrders
+	result["total_km"] = totalKm
+	result["total_minutes"] = totalMinutes
+	result["profit"] = profit
+
+	return result, nil
 }
 
 func (s *Sqlite) GetAllAssignments() ([]types.Assignment, error) {
@@ -232,8 +266,6 @@ func (s *Sqlite) GetPaginatedAssignments(limit, offset int) ([]types.Assignment,
 
 	return result, total, nil
 }
-
-
 
 func (s *Sqlite) CreateWarehouse(name string, location types.Location) (int64, error) {
 	stmt, err := s.Db.Prepare(`

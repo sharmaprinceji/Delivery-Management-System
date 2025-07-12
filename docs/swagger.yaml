@@ -95,7 +95,7 @@ definitions:
     - location
     - name
     type: object
-host: delivery-management-system-h5nh.onrender.com
+host: localhost:5002
 info:
   contact:
     email: princesh1411@gmail.com
@@ -129,6 +129,38 @@ paths:
       summary: Get agent summary with pagination
       tags:
       - Summary
+  /api/agent/{agent_id}:
+    get:
+      description: Returns full summary of agent including total orders, profit, etc.
+      parameters:
+      - description: Agent ID
+        in: path
+        name: agent_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get Agent Details
+      tags:
+      - Agent
   /api/agent/checkin:
     post:
       consumes:
@@ -207,38 +239,6 @@ paths:
       summary: Get paginated assignments
       tags:
       - Assignments
-  /api/checkin:
-    get:
-      consumes:
-      - application/json
-      description: Marks the agent as checked-in at the warehouse
-      parameters:
-      - description: Agent Check-In Data
-        in: body
-        name: agent
-        required: true
-        schema:
-          $ref: '#/definitions/types.AgentCheckInRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      summary: Check in an agent (second version)
-      tags:
-      - Agent
   /api/order:
     post:
       consumes:

@@ -9,7 +9,7 @@ type Storage interface {
 	GetCheckedInAgents() ([]types.Agent, error)
 	GetUnassignedOrders() ([]types.Order, error)
 	AssignOrderToAgent(orderID int64, agentID int64) error
-	CheckInAgent(agent types.Agent) error
+	GetAgentDetails(agentID int64) (map[string]interface{}, error)
 	// GetAllAssignments() ([]types.Assignment, error)
 	GetPaginatedAssignments(limit, offset int) ([]types.Assignment, int, error)
 

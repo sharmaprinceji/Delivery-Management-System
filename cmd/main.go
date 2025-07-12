@@ -19,6 +19,7 @@ import (
 	_ "github.com/sharmaprinceji/delivery-management-system/docs"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
+   // delivery-management-system-h5nh.onrender.com  // localhost:5002
 
 // @title Delivery Management System API
 // @version 1.0

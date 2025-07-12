@@ -1,11 +1,10 @@
 package agent
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"log"
 	"log/slog"
 	"math"
 	"net/http"
@@ -14,12 +13,13 @@ import (
 	// "strconv"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 	"github.com/sharmaprinceji/delivery-management-system/internal/types"
 	"github.com/sharmaprinceji/delivery-management-system/internal/utils/response"
 )
 
-var validate = validator.New()
+//var validate = validator.New()
 
 // CreateWareHouse godoc
 // @Summary Create a new warehouse
@@ -101,48 +101,39 @@ func CheckedInAgents(storage storage.Storage) http.HandlerFunc {
 }
 
 
-// CheckInAgent godoc
-// @Summary Check in an agent (second version)
-// @Description Marks the agent as checked-in at the warehouse
+// In handler/agent.go
+// GetAgentDetails godoc
+// @Summary Get Agent Details
+// @Description Returns full summary of agent including total orders, profit, etc.
 // @Tags Agent
-// @Accept json
 // @Produce json
-// @Param agent body types.AgentCheckInRequest true "Agent Check-In Data"
-// @Success 201 {object} map[string]string
+// @Param agent_id path int true "Agent ID"
+// @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} response.Response
+// @Failure 404 {object} response.Response
 // @Failure 500 {object} response.Response
-// @Router /api/checkin [get]
-func CheckInAgent(storage storage.Storage) http.HandlerFunc {
+// @Router /api/agent/{agent_id} [get]
+func GetAgentDetails(storage storage.Storage) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var agent types.Agent
-
-		err := json.NewDecoder(r.Body).Decode(&agent)
-		if errors.Is(err, io.EOF) {
-			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("request body is invalid")))
-			return
-		}
+		vars := mux.Vars(r)
+		agentIDStr := vars["agent_id"]
+		agentID, err := strconv.ParseInt(agentIDStr, 10, 64)
 		if err != nil {
-			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("failed to decode request body: %v", err)))
-			return
-		}
-		
-		// log.Printf("Received agent data: %+v\n", agent)
-
-		// Validation
-		if err := validate.Struct(agent); err != nil {
-			validateErrs := err.(validator.ValidationErrors)
-			response.WriteJSON(w, http.StatusBadRequest, response.ValidationError(validateErrs))
+			response.WriteJSON(w, http.StatusBadRequest, response.GeneralError(fmt.Errorf("invalid agent ID")))
 			return
 		}
 
-		err = storage.CheckInAgent(agent)
+		agentData, err := storage.GetAgentDetails(agentID)
 		if err != nil {
-			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(fmt.Errorf("failed to check-in agent: %v", err)))
+			if errors.Is(err, sql.ErrNoRows) {
+				response.WriteJSON(w, http.StatusNotFound, response.GeneralError(fmt.Errorf("agent not found")))
+				return
+			}
+			response.WriteJSON(w, http.StatusInternalServerError, response.GeneralError(err))
 			return
 		}
 
-		log.Printf("Agent checked in successfully: %+v", agent)
-		response.WriteJSON(w, http.StatusCreated, map[string]string{"status": "agent checked in"})
+		response.WriteJSON(w, http.StatusOK, agentData)
 	}
 }
 
