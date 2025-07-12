@@ -27,8 +27,6 @@ var (
 
 func MustLoad() *Config {
 	once.Do(func() {
-		// var configPath string
-
 		var configPath = os.Getenv("CONFIG_PATH")
 
 		if configPath == "" {
