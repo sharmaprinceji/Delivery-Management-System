@@ -102,10 +102,10 @@ payload:
   }
 ]
 
-7.Trigger Manual Allocation:
+7. Trigger Manual Allocation:
 GET /api/allocate
 
-8.Get Agent Utilization Summary (with paginaton):
+8.Get Agent Utilization Summary (with pagination):
 GET /api/agent-summary?page=1
 response:
 [
@@ -118,7 +118,7 @@ response:
   }
 ]
 
-9.System Summary (with pagination):
+9. System Summary (with pagination):
 GET /api/system-summary?page=2
 response:
 {
@@ -137,9 +137,6 @@ Travel Time	1 km = 5 min
 Min Agent Profit	₹500
 25+ orders	₹35/order
 50+ orders	₹42/order
-
-#Deployed Link:
-https://delivery-management-system-h5nh.onrender.com
 
 #end.....
 
