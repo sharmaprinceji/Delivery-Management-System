@@ -2,28 +2,23 @@ package router
 
 import (
 	"log"
-	"net/http"
 
-	// "time"
-
+	"github.com/gorilla/mux"
 	"github.com/sharmaprinceji/delivery-management-system/db"
 	"github.com/sharmaprinceji/delivery-management-system/internal/config"
-	//"github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
-	//"github.com/sharmaprinceji/delivery-management-system/internal/router/orderRoute"
 	"github.com/sharmaprinceji/delivery-management-system/internal/schedular"
 	"github.com/sharmaprinceji/delivery-management-system/internal/storage"
 )
 
-// router/router.go
-func SetupRouter() (*http.ServeMux, storage.Storage) {
-	router := http.NewServeMux()
+func SetupRouter() (*mux.Router, storage.Storage) {
+	router := mux.NewRouter()
 	cfg := config.MustLoad()
 
 	st, err := db.Mydb(cfg)
 	if err != nil {
 		log.Fatalf("failed to init DB: %v", err)
 	}
-	
+
 	log.Println("Db connection on..", cfg.HTTPServer.Addr)
 
 	if err := st.InitSchema(); err != nil {
@@ -34,4 +29,3 @@ func SetupRouter() (*http.ServeMux, storage.Storage) {
 
 	return router, st
 }
-

@@ -4,7 +4,10 @@ go 1.22.2
 
 require github.com/swaggo/swag v1.16.4
 
-require github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
+require (
+	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
+)
 
 require (
 	github.com/BurntSushi/toml v1.5.0 // indirect

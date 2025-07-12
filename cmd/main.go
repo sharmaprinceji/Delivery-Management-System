@@ -10,13 +10,15 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/sharmaprinceji/delivery-management-system/internal/config"
 	"github.com/sharmaprinceji/delivery-management-system/internal/router"
+
 	"github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
 	"github.com/sharmaprinceji/delivery-management-system/internal/router/orderRoute"
 
-	"github.com/swaggo/http-swagger"
-	_ "github.com/sharmaprinceji/delivery-management-system/docs"                     
+	_ "github.com/sharmaprinceji/delivery-management-system/docs"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // @title Delivery Management System API
@@ -26,18 +28,20 @@ import (
 // @contact.email prince@example.com
 // @host localhost:5002
 // @BasePath /
-
 func main() {
 	cfg := config.MustLoad()
 
 	route, storage := router.SetupRouter()
 
-	agentroute.RegisterAgentRoutes(route, storage)
+	// Enable CORS
+	route.Use(mux.CORSMethodMiddleware(route))
+	route.Use(corsMiddleware)
+
+	agentRoute.RegisterAgentRoutes(route, storage)
 	orderroute.RegisterOrderRoutes(route, storage)
 
 	// Swagger route
-	route.Handle("/", httpSwagger.WrapHandler)
-
+	route.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -55,10 +59,8 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 
 	go func() {
-		err := server.ListenAndServe()
-		if err != nil {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			fmt.Printf("Error starting server: %v\n", err)
-			return
 		}
 	}()
 
@@ -68,10 +70,23 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	er := server.Shutdown(ctx)
-	if er != nil {
-		slog.Error("failed to shutting down server", slog.String("error", er.Error()))
+	if err := server.Shutdown(ctx); err != nil {
+		slog.Error("failed to shutting down server", slog.String("error", err.Error()))
 	}
 
 	slog.Info("Server stopped gracefully")
+}
+
+// CORS middleware
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
