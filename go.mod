@@ -6,6 +6,7 @@ require github.com/swaggo/swag v1.16.4
 
 require (
 	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 )
 
