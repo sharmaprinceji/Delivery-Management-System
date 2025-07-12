@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/sharmaprinceji/delivery-management-system/internal/config"
+	//"github.com/sharmaprinceji/delivery-management-system/internal/config"
 	"github.com/sharmaprinceji/delivery-management-system/internal/router"
 
 	"github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
@@ -29,7 +29,7 @@ import (
 // @host localhost:5002
 // @BasePath /
 func main() {
-	cfg := config.MustLoad()
+	//cfg := config.MustLoad()
 
 	route, storage := router.SetupRouter()
 
@@ -53,7 +53,7 @@ func main() {
 		Handler: route,
 	}
 
-	slog.Info("Starting server...", slog.String("address", cfg.HTTPServer.Addr))
+	slog.Info("Starting server...", slog.String("address",  ":" + port))
 
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
