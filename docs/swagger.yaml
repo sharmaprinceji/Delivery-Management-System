@@ -1,0 +1,358 @@
+basePath: /
+definitions:
+  response.Response:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  types.AgentCheckInRequest:
+    properties:
+      name:
+        type: string
+      warehouse_id:
+        type: integer
+    required:
+    - name
+    - warehouse_id
+    type: object
+  types.AgentSummary:
+    properties:
+      agent_id:
+        type: integer
+      profit:
+        type: number
+      total_km:
+        type: number
+      total_minutes:
+        type: number
+      total_orders:
+        type: integer
+    type: object
+  types.Location:
+    properties:
+      lat:
+        type: number
+      lng:
+        type: number
+    required:
+    - lat
+    - lng
+    type: object
+  types.OrderRequest:
+    properties:
+      customer:
+        type: string
+      lat:
+        type: number
+      lng:
+        type: number
+      warehouse_id:
+        type: integer
+    required:
+    - customer
+    - lat
+    - lng
+    - warehouse_id
+    type: object
+  types.PaginatedAgentSummary:
+    properties:
+      current_page:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/types.AgentSummary'
+        type: array
+      total_pages:
+        type: integer
+    type: object
+  types.SystemSummary:
+    properties:
+      agent_utilization:
+        $ref: '#/definitions/types.PaginatedAgentSummary'
+      assigned_orders:
+        type: integer
+      deferred_orders:
+        type: integer
+      total_orders:
+        type: integer
+    type: object
+  types.WarehouseRequest:
+    properties:
+      location:
+        $ref: '#/definitions/types.Location'
+      name:
+        type: string
+    required:
+    - location
+    - name
+    type: object
+host: localhost:5002
+info:
+  contact:
+    email: prince@example.com
+    name: Prince Raj
+  description: API for managing delivery agents, orders and allocation system
+  title: Delivery Management System API
+  version: "1.0"
+paths:
+  /api/agent-summary:
+    get:
+      consumes:
+      - application/json
+      description: Returns a paginated summary of agents, including total orders,
+        distance, time, and profit
+      parameters:
+      - description: Page number (default is 1)
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.PaginatedAgentSummary'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get agent summary with pagination
+      tags:
+      - Summary
+  /api/agent/checkin:
+    post:
+      consumes:
+      - application/json
+      description: Allows an agent to check in to a warehouse
+      parameters:
+      - description: Agent Check-In Info
+        in: body
+        name: agent
+        required: true
+        schema:
+          $ref: '#/definitions/types.AgentCheckInRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Check-in an agent
+      tags:
+      - Agent
+  /api/allocate:
+    get:
+      description: Runs the allocation algorithm to assign orders to agents
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Allocation successful
+          schema:
+            type: string
+        "500":
+          description: Allocation failed
+          schema:
+            type: string
+      summary: Trigger manual allocation of orders
+      tags:
+      - Orders
+  /api/assignments:
+    get:
+      consumes:
+      - application/json
+      description: Returns paginated list of assignments with formatted date
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of assignments
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get paginated assignments
+      tags:
+      - Assignments
+  /api/checkin:
+    get:
+      consumes:
+      - application/json
+      description: Marks the agent as checked-in at the warehouse
+      parameters:
+      - description: Agent Check-In Data
+        in: body
+        name: agent
+        required: true
+        schema:
+          $ref: '#/definitions/types.AgentCheckInRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Check in an agent (second version)
+      tags:
+      - Agent
+  /api/order:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new customer order and stores it in the database
+      parameters:
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/types.OrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create a new order
+      tags:
+      - Orders
+  /api/orders/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Accepts a list of customer orders and stores them in the database
+      parameters:
+      - description: List of order requests
+        in: body
+        name: orders
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/types.OrderRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create multiple orders in bulk
+      tags:
+      - Orders
+  /api/system-summary:
+    get:
+      consumes:
+      - application/json
+      description: Returns a system-wide summary including total, assigned, and deferred
+        orders, along with agent utilization
+      parameters:
+      - description: Page number (default is 1)
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SystemSummary'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get system summary with paginated agent utilization
+      tags:
+      - Summary
+  /api/warehouse:
+    post:
+      consumes:
+      - application/json
+      description: Accepts warehouse details and stores them in the system
+      parameters:
+      - description: Warehouse Details
+        in: body
+        name: warehouse
+        required: true
+        schema:
+          $ref: '#/definitions/types.WarehouseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: integer
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Create a new warehouse
+      tags:
+      - Warehouse
+swagger: "2.0"

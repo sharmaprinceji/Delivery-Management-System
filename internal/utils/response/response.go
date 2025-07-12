@@ -15,6 +15,11 @@ type Response struct {
 	Error   string   `json:"error"`
 }
 
+type ErrorResponse struct {
+	Status string `json:"status"`
+	Error  string `json:"error"`
+}
+
 const (
 	StatusOk="OK"
 	StatusError="Error"
@@ -27,14 +32,14 @@ func WriteJSON(w http.ResponseWriter, status int, data interface{}) error {
 	return  json.NewEncoder(w).Encode(data)
 }
 
-func GeneralError(err error) Response {
-	return Response{
+func GeneralError(err error) ErrorResponse {
+	return ErrorResponse{
 		Status: StatusError,
 		Error: err.Error(),
 	}
 }
 
-func ValidationError(errs  validator.ValidationErrors) Response {
+func ValidationError(errs  validator.ValidationErrors) ErrorResponse {
 	var errMsgs []string
 	for _, err := range errs {
 		switch err.ActualTag() {
@@ -45,7 +50,7 @@ func ValidationError(errs  validator.ValidationErrors) Response {
 		}
 	}
 
-	return Response{
+	return ErrorResponse{
 		Status: StatusError,
 		Error:  strings.Join(errMsgs, ", "	),
 	}

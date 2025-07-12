@@ -10,7 +10,7 @@ import (
 
 func RegisterOrderRoutes(router *http.ServeMux, storage storage.Storage) {
 	router.HandleFunc("POST /api/order", order.CreateOrder(storage))  
-	router.HandleFunc("POST /api/orders", order.CreateBulkOrders(storage))
+	router.HandleFunc("POST /api/orders/bulk", order.CreateBulkOrders(storage))
 	router.HandleFunc("GET /api/allocate", order.ManualAllocation(storage))  
 	router.HandleFunc("GET /api/agent-summary", order.GetAgentSummary(storage))
     router.HandleFunc("GET /api/system-summary", order.GetSystemSummary(storage)) 
