@@ -14,3 +14,6 @@ variables:
     tier2_orders: 50
     tier1_rate: 35
     tier2_rate: 42
+
+  gemini:
+    GEMINI_API_KEY: "AIzaSyAN0L3wkmRzadv7FTpC81ZD9GkACUbrTqU"

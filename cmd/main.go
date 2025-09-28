@@ -14,12 +14,15 @@ import (
 	"github.com/sharmaprinceji/delivery-management-system/internal/router"
 
 	"github.com/sharmaprinceji/delivery-management-system/internal/router/agentRoute"
+	openairoute "github.com/sharmaprinceji/delivery-management-system/internal/router/openAiRoute"
 	"github.com/sharmaprinceji/delivery-management-system/internal/router/orderRoute"
 
 	_ "github.com/sharmaprinceji/delivery-management-system/docs"
 	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/joho/godotenv"
 )
-   // delivery-management-system-h5nh.onrender.com  // localhost:5002
+
+// delivery-management-system-h5nh.onrender.com  // localhost:5002
 
 // @title Delivery Management System API
 // @version 1.0
@@ -30,7 +33,8 @@ import (
 // @BasePath /
 func main() {
 	//cfg := config.MustLoad()
-
+    //set ai config here
+	godotenv.Load()
 	route, storage := router.SetupRouter()
 
 	// Enable CORS
@@ -39,6 +43,7 @@ func main() {
 
 	agentRoute.RegisterAgentRoutes(route, storage)
 	orderroute.RegisterOrderRoutes(route, storage)
+	openairoute.OpenAiRoutes(route, storage)
 
 	// Swagger route
 	route.PathPrefix("/swagger").Handler(httpSwagger.WrapHandler)

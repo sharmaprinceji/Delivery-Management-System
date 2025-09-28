@@ -6,6 +6,6 @@ import (
 )
 
 func OpenAiRoutes(router *mux.Router, storage storage.Storage) {
-	router.HandleFunc("/api/input-Ai",ai.Ai_input(storage)).Methods("POST")
-	router.HandleFunc("/api/output-Ai",ai.Ai_output(storage)).Methods("GET")
+	router.HandleFunc("/api/inputai",ai.Ai_input(storage)).Methods("POST")
+	router.HandleFunc("/api/outputai",ai.Ai_output(storage)).Methods("GET")
 }
